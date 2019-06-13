@@ -10,11 +10,24 @@ var mongoose = require('mongoose'); //libreria mongoose para trabajar con mongo 
 
 
 
-
 //***********************************************************************/
 // Inicialización de variables
 //***********************************************************************/
 var app = express();
+
+//***********************************************************************/
+// Importar rutas
+//***********************************************************************/
+var appRoutes = require('./routes/app');
+var usuarioRoutes = require('./routes/usuario');
+var loginRoutes = require('./routes/login');
+
+
+
+//Uso de rutas
+app.use('/usuario', usuarioRoutes);
+app.use('/login', loginRoutes);
+app.use('/', appRoutes);
 
 //Conexion a la base de datos mongodb
 mongoose.connection.openUri('mongodb://localhost:27017/hospitalDB', (err, res) => {
@@ -27,18 +40,7 @@ mongoose.connection.openUri('mongodb://localhost:27017/hospitalDB', (err, res) =
 });
 
 
-//***********************************************************************/
-// Rutas, peticiones
-//***********************************************************************/
-app.get('/', (req, res, next) => {
 
-    //Respuesta, con formato json
-    res.status(200).json({
-        ok: true,
-        mensaje: 'Petición realizada correctamente.'
-    });
-
-});
 
 
 //***********************************************************************/

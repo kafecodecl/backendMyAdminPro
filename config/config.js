@@ -1,0 +1,1 @@
+module.exports.SEED = '@este_es.un.SEED@token__1';
