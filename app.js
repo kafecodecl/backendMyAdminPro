@@ -7,7 +7,7 @@
 //***********************************************************************/
 var express = require('express'); // cargo la libreria de express
 var mongoose = require('mongoose'); //libreria mongoose para trabajar con mongo db
-
+var DB_CONN_URL = require('./config/config').DB_CONN_URL;
 
 
 //***********************************************************************/
@@ -20,20 +20,22 @@ var app = express();
 //***********************************************************************/
 var appRoutes = require('./routes/app');
 var usuarioRoutes = require('./routes/usuario');
+var hospitalRoutes = require('./routes/hospital');
 var loginRoutes = require('./routes/login');
 
 
 
 //Uso de rutas
+app.use('/hospital', hospitalRoutes);
 app.use('/usuario', usuarioRoutes);
 app.use('/login', loginRoutes);
 app.use('/', appRoutes);
 
 //Conexion a la base de datos mongodb
-mongoose.connection.openUri('mongodb://localhost:27017/hospitalDB', (err, res) => {
+mongoose.connection.openUri(DB_CONN_URL, (err, res) => {
 
     //Valido si hay algun error de conexion
-    if (err) throw err;
+    if (err) {console.log('ERROR, ', err); throw err;}
 
     console.log('Servidor base de datos OK puerto 27017, online');
 
