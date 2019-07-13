@@ -21,12 +21,14 @@ var app = express();
 var appRoutes = require('./routes/app');
 var usuarioRoutes = require('./routes/usuario');
 var hospitalRoutes = require('./routes/hospital');
+var MedicosRoutes = require('./routes/medico');
 var loginRoutes = require('./routes/login');
 
 
 
 //Uso de rutas
 app.use('/hospital', hospitalRoutes);
+app.use('/medico', MedicosRoutes);
 app.use('/usuario', usuarioRoutes);
 app.use('/login', loginRoutes);
 app.use('/', appRoutes);
@@ -35,7 +37,7 @@ app.use('/', appRoutes);
 mongoose.connection.openUri(DB_CONN_URL, (err, res) => {
 
     //Valido si hay algun error de conexion
-    if (err) {console.log('ERROR, ', err); throw err;}
+    if (err) { console.log('ERROR, ', err); throw err; }
 
     console.log('Servidor base de datos OK puerto 27017, online');
 
