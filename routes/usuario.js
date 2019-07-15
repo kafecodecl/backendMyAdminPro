@@ -20,8 +20,15 @@ app.use(bodyParser.json());
 //***********************************************************************/
 app.get('/', (req, res, next) => {
 
+    //Variable desde, que permite indicar desde que numero de registro mostrar 
+    //con la funcion limmit
+    var desde = req.query.desde || 0;
+    desde = Number(desde);
+
     //Realizo una búsqueda de usuarios
     Usuario.find({}, 'nombre email img role')
+        .skip(desde)//skip se saltará los primeros 'desde' registros
+        .limit(5)// mostrará lso siguientes 5 regsitros despues del skip
         .exec(
             (err, usuarios) => {
 
@@ -36,10 +43,24 @@ app.get('/', (req, res, next) => {
 
                 //SI todo eestá OK
                 //Respuesta, con formato json
-                res.status(200).json({
-                    ok: true,
-                    usuarios: usuarios
+                Usuario.count({}, (err, conteo) => {
+
+                    if (err) {
+                        return res.status(500).json({
+                            ok: false,
+                            mensaje: 'Error cargando usuarios (conteo).',
+                            errors: err
+                        });
+                    }
+
+                    res.status(200).json({
+                        ok: true,
+                        usuarios: usuarios,
+                        total: conteo
+                    });
+
                 });
+                
 
 
             });
