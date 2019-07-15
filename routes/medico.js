@@ -44,11 +44,25 @@ app.get('/', (req, res, next) => {
 
                 //SI todo eestá OK
                 //Respuesta, con formato json
-                res.status(200).json({
-                    ok: true,
-                    medicos: medicos
-                });
+                Medico.count({}, (err, conteo) => {
 
+                    if (err) {
+                        return res.status(500).json({
+                            ok: false,
+                            mensaje: 'Error cargando hospitales (conteo).',
+                            errors: err
+                        });
+                    }
+
+                    res.status(200).json({
+                        ok: true,
+                        medicos: medicos,
+                        conteo: conteo
+                    });
+    
+
+                });
+                
 
             });
 
