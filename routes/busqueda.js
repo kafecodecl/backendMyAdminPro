@@ -13,6 +13,53 @@ var Hospital = require('../models/hospital');
 var Medico = require('../models/medico');
 var Usuario = require('../models/usuario');
 
+
+//***********************************************************************/
+// Búsqueda por colección
+//***********************************************************************/
+app.get('/coleccion/:tabla/:busqueda', (req, res)=>{
+
+    var busqueda = req.params.busqueda;
+    var tabla = req.params.tabla;
+
+    var regex = new RegExp(busqueda, 'i');
+
+    var promesa;
+
+    switch( tabla ){
+        case 'usuario':
+            promesa = buscarUsuarios(busqueda, regex);
+        break;
+
+        case 'medico':
+            promesa = buscarMedicos(busqueda, regex);
+        break;
+        
+        case 'hospital':
+            promesa = buscarHospitales(busqueda, regex);
+        break;
+        default:
+            return res.status(400).json({
+                ok: false,
+                mensaje: 'ERROR, Los tipos de búsqueda solo pueden ser usuario, medico, hospital',
+                error: { message: 'Error, colección o tabla no válido' }
+            });
+    }
+
+    promesa.then( data => {
+        return res.status(200).json({
+            ok: true,
+            [tabla]: data
+        });
+    });
+
+
+});
+
+
+//***********************************************************************/
+// Búsqueda general
+//***********************************************************************/
 app.get('/todo/:busqueda', (req, res, next) => {
 
     var busqueda = req.params.busqueda;
@@ -44,34 +91,36 @@ function buscarHospitales ( busqueda, regex ){
 
     return new Promise( (resolve, reject) => {
 
-        Hospital.find({ nombre: regex }, (err, hospitales) => {
+        Hospital.find({ nombre: regex })
+            .populate('usuario', 'nombre email')
+            .exec((err, hospitales) => {
 
-            if (err){
-                reject('Error al cargar hospitales desde la búsqueda general.', err);
-            }else {
-                resolve(hospitales);
-            }
+                if (err){
+                    reject('Error al cargar hospitales desde la búsqueda general.', err);
+                }else {
+                    resolve(hospitales);
+                }
     
-        });
-
-    });
-   
+            });
+    });   
 }
 
 function buscarMedicos ( busqueda, regex ){
 
     return new Promise( (resolve, reject) => {
 
-        Medico.find({ nombre: regex }, (err, medicos) => {
+        Medico.find({ nombre: regex })
+            .populate('usuario', 'nombre email')
+            .populate('hospital', 'nombre')
+            .exec((err, medicos) => {
 
-            if (err){
-                reject('Error al cargar medicos desde la búsqueda general.', err);
-            }else {
-                resolve(medicos);
-            }
-    
-        });
-
+                if (err){
+                    reject('Error al cargar medicos desde la búsqueda general.', err);
+                }else {
+                    resolve(medicos);
+                }
+        
+            });
     });
    
 }
@@ -80,7 +129,7 @@ function buscarUsuarios ( busqueda, regex ){
 
     return new Promise( (resolve, reject) => {
 
-        Usuario.find()
+        Usuario.find({}, 'nombre email role')
         .or([{ 'nombre': regex}, { 'email': regex }])
         .exec( (err, usuarios) => {
             if (err){
