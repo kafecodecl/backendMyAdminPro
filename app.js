@@ -24,7 +24,13 @@ var hospitalRoutes = require('./routes/hospital');
 var MedicosRoutes = require('./routes/medico');
 var BusquedaRoutes = require('./routes/busqueda');
 var UploadRoutes = require('./routes/upload');
+var ImagenesRoutes = require('./routes/imagenes');
 var loginRoutes = require('./routes/login');
+
+//Server index config
+// var serveIndex = require('serve-index');
+// app.use(express.static(__dirname + '/'))
+// app.use('/upload', serveIndex(__dirname + '/upload'));
 
 
 
@@ -34,6 +40,7 @@ app.use('/medico', MedicosRoutes);
 app.use('/usuario', usuarioRoutes);
 app.use('/login', loginRoutes);
 app.use('/busqueda', BusquedaRoutes);
+app.use('/img', ImagenesRoutes);
 app.use('/upload', UploadRoutes);
 
 app.use('/', appRoutes);
