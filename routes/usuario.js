@@ -27,8 +27,8 @@ app.get('/', (req, res, next) => {
 
     //Realizo una búsqueda de usuarios
     Usuario.find({}, 'nombre email img role')
-        .skip(desde)//skip se saltará los primeros 'desde' registros
-        .limit(5)// mostrará lso siguientes 5 regsitros despues del skip
+        .skip(desde) //skip se saltará los primeros 'desde' registros
+        .limit(5) // mostrará lso siguientes 5 regsitros despues del skip
         .exec(
             (err, usuarios) => {
 
@@ -60,7 +60,7 @@ app.get('/', (req, res, next) => {
                     });
 
                 });
-                
+
 
 
             });
@@ -136,7 +136,7 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
 //***********************************************************************/
 // Crear un usuario
 //***********************************************************************/
-app.post('/', mdAutenticacion.verificaToken, (req, res) => {
+app.post('/', (req, res) => {
 
     var body = req.body;
 
