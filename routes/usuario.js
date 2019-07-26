@@ -26,7 +26,7 @@ app.get('/', (req, res, next) => {
     desde = Number(desde);
 
     //Realizo una búsqueda de usuarios
-    Usuario.find({}, 'nombre email img role')
+    Usuario.find({}, 'nombre email img role google')
         .skip(desde) //skip se saltará los primeros 'desde' registros
         .limit(5) // mostrará lso siguientes 5 regsitros despues del skip
         .exec(
