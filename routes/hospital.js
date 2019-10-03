@@ -7,81 +7,94 @@ var mdAutenticacion = require('../middleware/autenticacion'); //Se importa el mi
 //importamos el modelo de hospitales
 var Hospital = require('../models/hospital');
 
-
 //configuracion del body parser
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-
 //***********************************************************************/
 // Obtener todos los hospitales
 //***********************************************************************/
 app.get('/', (req, res, next) => {
-
-    //Variable desde, que permite indicar desde que numero de registro mostrar 
+    //Variable desde, que permite indicar desde que numero de registro mostrar
     //con la funcion limmit
     var desde = req.query.desde || 0;
     desde = Number(desde);
 
     //Realizo una búsqueda de hospitales
     Hospital.find({})
-        .skip(desde)//skip se saltará los primeros 'desde' registros
-        .limit(5)// mostrará lso siguientes 5 regsitros despues del skip
+        .skip(desde) //skip se saltará los primeros 'desde' registros
+        .limit(5) // mostrará lso siguientes 5 regsitros despues del skip
         // la función populate() de mongoose permite obtener la información de unba tabla relacionada
-        .populate('usuario', 'nombre email') 
-        .exec(
-            (err, hospitales) => {
+        .populate('usuario', 'nombre email')
+        .exec((err, hospitales) => {
+            //Valido si ocurre algun error en la bd
+            if (err) {
+                return res.status(500).json({
+                    ok: false,
+                    mensaje: 'Error cargando hospitales.',
+                    errors: err
+                });
+            }
 
-                //Valido si ocurre algun error en la bd
+            //SI todo eestá OK
+            //Respuesta, con formato json
+            Hospital.count({}, (err, conteo) => {
                 if (err) {
                     return res.status(500).json({
                         ok: false,
-                        mensaje: 'Error cargando hospitales.',
+                        mensaje: 'Error cargando hospitales (conteo).',
                         errors: err
                     });
                 }
 
-                //SI todo eestá OK
-                //Respuesta, con formato json    
-                Hospital.count({}, (err, conteo) => {
-
-                    if (err) {
-                        return res.status(500).json({
-                            ok: false,
-                            mensaje: 'Error cargando hospitales (conteo).',
-                            errors: err
-                        });
-                    }
-
-                    res.status(200).json({
-                        ok: true,
-                        hospitales: hospitales,
-                        conteo: conteo
-                    });
-
+                res.status(200).json({
+                    ok: true,
+                    hospitales: hospitales,
+                    conteo: conteo
                 });
-
-
             });
-
+        });
 });
 
-
+// ==========================================
+// Obtener Hospital por ID
+// ==========================================
+app.get('/:id', (req, res) => {
+    var id = req.params.id;
+    Hospital.findById(id)
+        .populate('usuario', 'nombre img email')
+        .exec((err, hospital) => {
+            if (err) {
+                return res.status(500).json({
+                    ok: false,
+                    mensaje: 'Error al buscar hospital',
+                    errors: err
+                });
+            }
+            if (!hospital) {
+                return res.status(400).json({
+                    ok: false,
+                    mensaje: 'El hospital con el id ' + id + '   no existe',
+                    errors: { message: 'No existe un hospital con ese ID' }
+                });
+            }
+            res.status(200).json({
+                ok: true,
+                hospital: hospital
+            });
+        });
+});
 
 //***********************************************************************/
 // Actualizar un hospital
 //***********************************************************************/
 app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
-
     //Obtengo el id a  actualizar
     var id = req.params.id;
     var body = req.body;
 
     Hospital.findById(id, (err, hospital) => {
-
-
-
         //Manejo de posible error
         if (err) {
             return res.status(500).json({
@@ -106,7 +119,6 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
 
         //Guardo los cambios
         hospital.save((err, hospitalActualizado) => {
-
             if (err) {
                 return res.status(400).json({
                     ok: false,
@@ -122,17 +134,13 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
                 hospitalToken: req.hospital
             });
         });
-
-
     });
-
 });
 
 //***********************************************************************/
 // Crear un hospital
 //***********************************************************************/
 app.post('/', mdAutenticacion.verificaToken, (req, res) => {
-
     var body = req.body;
 
     //Para insertar el hospital
@@ -144,7 +152,6 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
 
     //2. para guardar el hospital
     hospital.save((err, hospitalGuardado) => {
-
         //Manejo de posible error
         if (err) {
             return res.status(400).json({
@@ -160,17 +167,13 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
             hospital: hospitalGuardado,
             hospitalToken: req.hospital
         });
-
-
     });
-
 });
 
 //***********************************************************************/
 // Eliminar un hospital por id
 //***********************************************************************/
 app.delete('/:id', mdAutenticacion.verificaToken, (req, res) => {
-
     var id = req.params.id;
 
     Hospital.findByIdAndRemove(id, (err, hospitalBorrado) => {
@@ -199,7 +202,6 @@ app.delete('/:id', mdAutenticacion.verificaToken, (req, res) => {
             hospitalToken: req.hospital
         });
     });
-
 });
 
 module.exports = app;
