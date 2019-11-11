@@ -26,10 +26,10 @@ app.get('/', (req, res, next) => {
 
     //Realizo una búsqueda de medicos
     Medico.find({})
-        .skip(desde)//skip se saltará los primeros 'desde' registros
-        .limit(5)// mostrará lso siguientes 5 regsitros despues del skip
-        .populate('usuario', 'nombre email') 
-        .populate('hospital') 
+        .skip(desde) //skip se saltará los primeros 'desde' registros
+        .limit(5) // mostrará lso siguientes 5 regsitros despues del skip
+        .populate('usuario', 'nombre email')
+        .populate('hospital')
         .exec(
             (err, medicos) => {
 
@@ -59,10 +59,10 @@ app.get('/', (req, res, next) => {
                         medicos: medicos,
                         conteo: conteo
                     });
-    
+
 
                 });
-                
+
 
             });
 
@@ -141,7 +141,7 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
     var medico = new Medico({
         nombre: body.nombre,
         usuario: req.usuario._id,
-        hospital: body.hospital._id
+        hospital: body.hospital
     });
 
     //2. para guardar el medico
