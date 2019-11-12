@@ -30,44 +30,84 @@ app.get('/', (req, res, next) => {
         .limit(5) // mostrará lso siguientes 5 regsitros despues del skip
         .populate('usuario', 'nombre email')
         .populate('hospital')
-        .exec(
-            (err, medicos) => {
+        .exec((err, medicos) => {
 
-                //Valido si ocurre algun error en la bd
+            //Valido si ocurre algun error en la bd
+            if (err) {
+                return res.status(500).json({
+                    ok: false,
+                    mensaje: 'Error cargando medicos.',
+                    errors: err
+                });
+            }
+
+            //SI todo eestá OK
+            //Respuesta, con formato json
+            Medico.count({}, (err, conteo) => {
+
                 if (err) {
                     return res.status(500).json({
                         ok: false,
-                        mensaje: 'Error cargando medicos.',
+                        mensaje: 'Error cargando hospitales (conteo).',
                         errors: err
                     });
                 }
 
-                //SI todo eestá OK
-                //Respuesta, con formato json
-                Medico.count({}, (err, conteo) => {
-
-                    if (err) {
-                        return res.status(500).json({
-                            ok: false,
-                            mensaje: 'Error cargando hospitales (conteo).',
-                            errors: err
-                        });
-                    }
-
-                    res.status(200).json({
-                        ok: true,
-                        medicos: medicos,
-                        conteo: conteo
-                    });
-
-
+                res.status(200).json({
+                    ok: true,
+                    medicos: medicos,
+                    conteo: conteo
                 });
 
 
             });
 
+
+        });
+
 });
 
+
+//***********************************************************************/
+// Médico por ID
+//***********************************************************************/
+app.get('/:id', (req, res) => {
+
+    var id = req.params.id;
+
+    Medico.findById(id)
+        .populate('usuario', 'nombre email img')
+        .populate('hospital')
+        .exec((err, medico) => {
+
+            console.log(err, medico);
+
+            //Manejo de posible error
+            if (err) {
+                return res.status(500).json({
+                    ok: false,
+                    mensaje: 'Error al buscar medico.',
+                    errors: err
+                });
+            }
+
+            //Si no existe el medico envio error 400
+            if (!medico) {
+                return res.status(400).json({
+                    ok: false,
+                    mensaje: 'El medico ID: ' + id + ' no existe',
+                    errors: { message: 'No existe un medico con el id enviado' }
+                });
+            }
+
+            res.status(200).json({
+                ok: true,
+                medico: medico
+            });
+
+        });
+
+});
 
 
 //***********************************************************************/
