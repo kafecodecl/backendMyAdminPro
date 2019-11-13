@@ -36,3 +36,46 @@ exports.verificaToken = function(req, res, next) {
 
     });
 }
+
+//***********************************************************************/
+// Verificar Administrador ADMIN_ROLE
+//***********************************************************************/
+exports.verificaADMIN_ROLE = function(req, res, next) {
+    //Recibir eltoken
+    var usuario = req.usuario;
+
+    if (usuario.role === 'ADMIN_ROLE') {
+        next();
+        return;
+    } else {
+
+        return res.status(401).json({
+            ok: false,
+            mensaje: 'Acción no autorizada',
+            errors: { message: 'No es administrador' }
+        });
+
+    }
+}
+
+//***********************************************************************/
+// Verificar Admin o mismo usuario
+//***********************************************************************/
+exports.verificaADMIN_o_MismoUsuario = function(req, res, next) {
+    //Recibir eltoken
+    var usuario = req.usuario;
+    var id = req.params.id;
+
+    if (usuario.role === 'ADMIN_ROLE' || usuario._id === id) {
+        next();
+        return;
+    } else {
+
+        return res.status(401).json({
+            ok: false,
+            mensaje: 'Acción no autorizada',
+            errors: { message: 'No es administrador y no es el usuario logeado' }
+        });
+
+    }
+}

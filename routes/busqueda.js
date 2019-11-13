@@ -17,7 +17,7 @@ var Usuario = require('../models/usuario');
 //***********************************************************************/
 // Búsqueda por colección
 //***********************************************************************/
-app.get('/coleccion/:tabla/:busqueda', (req, res)=>{
+app.get('/coleccion/:tabla/:busqueda', (req, res) => {
 
     var busqueda = req.params.busqueda;
     var tabla = req.params.tabla;
@@ -26,18 +26,18 @@ app.get('/coleccion/:tabla/:busqueda', (req, res)=>{
 
     var promesa;
 
-    switch( tabla ){
+    switch (tabla) {
         case 'usuario':
             promesa = buscarUsuarios(busqueda, regex);
-        break;
+            break;
 
         case 'medico':
             promesa = buscarMedicos(busqueda, regex);
-        break;
-        
+            break;
+
         case 'hospital':
             promesa = buscarHospitales(busqueda, regex);
-        break;
+            break;
         default:
             return res.status(400).json({
                 ok: false,
@@ -46,7 +46,7 @@ app.get('/coleccion/:tabla/:busqueda', (req, res)=>{
             });
     }
 
-    promesa.then( data => {
+    promesa.then(data => {
         return res.status(200).json({
             ok: true,
             [tabla]: data
@@ -69,10 +69,10 @@ app.get('/todo/:busqueda', (req, res, next) => {
     var regex = new RegExp(busqueda, 'i');
 
     Promise.all([
-        buscarHospitales ( busqueda, regex ),
-        buscarMedicos  ( busqueda, regex ),
-        buscarUsuarios ( busqueda, regex )
-    ]).then( repuestas => {
+        buscarHospitales(busqueda, regex),
+        buscarMedicos(busqueda, regex),
+        buscarUsuarios(busqueda, regex)
+    ]).then(repuestas => {
 
         res.status(200).json({
             ok: true,
@@ -82,65 +82,65 @@ app.get('/todo/:busqueda', (req, res, next) => {
         })
     });
 
-    
+
 
 });
 
 //Utilizamos promesas para realizar las busquedas en las distintas tablas
-function buscarHospitales ( busqueda, regex ){
+function buscarHospitales(busqueda, regex) {
 
-    return new Promise( (resolve, reject) => {
+    return new Promise((resolve, reject) => {
 
         Hospital.find({ nombre: regex })
-            .populate('usuario', 'nombre email')
+            .populate('hospital')
             .exec((err, hospitales) => {
 
-                if (err){
+                if (err) {
                     reject('Error al cargar hospitales desde la búsqueda general.', err);
-                }else {
+                } else {
                     resolve(hospitales);
                 }
-    
+
             });
-    });   
+    });
 }
 
-function buscarMedicos ( busqueda, regex ){
+function buscarMedicos(busqueda, regex) {
 
-    return new Promise( (resolve, reject) => {
+    return new Promise((resolve, reject) => {
 
         Medico.find({ nombre: regex })
-            .populate('usuario', 'nombre email')
-            .populate('hospital', 'nombre')
+            .populate('usuario')
+            .populate('hospital')
             .exec((err, medicos) => {
 
-                if (err){
+                if (err) {
                     reject('Error al cargar medicos desde la búsqueda general.', err);
-                }else {
+                } else {
                     resolve(medicos);
                 }
-        
+
             });
     });
-   
+
 }
 
-function buscarUsuarios ( busqueda, regex ){
+function buscarUsuarios(busqueda, regex) {
 
-    return new Promise( (resolve, reject) => {
+    return new Promise((resolve, reject) => {
 
-        Usuario.find({}, 'nombre email role')
-        .or([{ 'nombre': regex}, { 'email': regex }])
-        .exec( (err, usuarios) => {
-            if (err){
-                reject('Error al cargar usuarios desde la búsqueda general.', err);
-            }else {
-                resolve(usuarios);
-            }
-        })
+        Usuario.find({}, 'nombre email role img')
+            .or([{ 'nombre': regex }, { 'email': regex }])
+            .exec((err, usuarios) => {
+                if (err) {
+                    reject('Error al cargar usuarios desde la búsqueda general.', err);
+                } else {
+                    resolve(usuarios);
+                }
+            })
 
     });
-   
+
 }
 
 module.exports = app;
